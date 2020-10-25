@@ -1,0 +1,1 @@
+bot: python weather_bot.py
