@@ -4,7 +4,11 @@ from datetime import datetime
 from api_tokens import token_bot, token_weather
 
 class MyTeleBot(TeleBot):
+    """This class extands class TeleBot from lib telebot"""
+
     def __init__(self, token, parse_mode=None, threaded=True, skip_pending=False, num_threads=2, next_step_backend=None, reply_backend=None):
+        """Adding dictionary for keeping last location"""
+
         TeleBot.__init__(self, token, parse_mode=None, threaded=True, skip_pending=False, num_threads=2, next_step_backend=None, reply_backend=None)
         self.geo_dict = {}
 
@@ -12,6 +16,8 @@ bot = MyTeleBot(token_bot, parse_mode=None)
 api_key = token_weather
 
 def keyboard_create():
+    """Creating inline keyboard and returning it"""
+
     keyboard = types.InlineKeyboardMarkup()
 
     weather_now = types.InlineKeyboardButton(text='Cейчас', callback_data='now')
@@ -24,6 +30,8 @@ def keyboard_create():
     return keyboard
 
 def button_create():
+    """Creating reply button for sending location and returning it"""
+
     markup = types.ReplyKeyboardMarkup()
     send_geo = types.KeyboardButton('Отправить геопозицию', request_location=True)
     markup.add(send_geo)
@@ -31,11 +39,15 @@ def button_create():
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
+    """Start/help hint"""
+
     bot.reply_to(message, 'Привет, это погодный бот! Отправь мне геолокацию!')
 
 
 @bot.message_handler(content_types=['text'])
 def send_text(message):
+    """Handling text messages and replying"""
+
     if message.text.lower() in ['привет', 'hi', 'yo', 'йоу', 'йо', 'хай', 'hello']:
         bot.send_message(message.chat.id, f'{message.text.title()}, {message.chat.first_name}!')
         bot.send_sticker(message.chat.id, 'CAACAgIAAxkBAAMZX4xI4pYCSSzxDUkMStyk2ICOkuwAAtkHAAKMLf0HUpA0FAia114bBA')
@@ -50,6 +62,8 @@ def send_text(message):
 
 @bot.message_handler(content_types=['location'])
 def receive_location(message):
+    """Handling location, creating inline keyboard"""
+
     bot.geo_dict[str(message.chat.id)] = [message.location.latitude, message.location.longitude]
 
     keyboard = keyboard_create()
@@ -59,6 +73,7 @@ def receive_location(message):
 
 @bot.callback_query_handler(func=lambda call: True)
 def send_weather(call):
+    """Handling calls of inline keyboard"""
 
     DAYS_WEEK = {
     '1': 'Понедельник',
